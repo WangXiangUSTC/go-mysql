@@ -3,8 +3,10 @@ package replication
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"math"
 
+	"github.com/siddontang/go-log/log"
 	"github.com/pingcap/errors"
 	. "github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go/hack"
@@ -279,10 +281,31 @@ func (d *jsonBinaryDecoder) isDataShort(data []byte, expected int) bool {
 	}
 
 	if len(data) < expected {
+		
 		d.err = errors.Errorf("data len %d < expected %d", len(data), expected)
+		log.Warnf("error %v, stack %s", d.err, StackTrace(true))
 	}
 
 	return d.err != nil
+}
+
+// StackTrace is used for trace function's call stack
+func StackTrace(all bool) string {
+	// Reserve 10K buffer at first
+	buf := make([]byte, 10240)
+
+	for {
+		size := runtime.Stack(buf, all)
+		// The size of the buffer may be not enough to hold the stacktrace,
+		// so double the buffer size
+		if size == len(buf) {
+			buf = make([]byte, len(buf)<<1)
+			continue
+		}
+		break
+	}
+
+	return string(buf)
 }
 
 func (d *jsonBinaryDecoder) decodeInt16(data []byte) int16 {
