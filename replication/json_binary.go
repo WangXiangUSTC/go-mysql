@@ -156,7 +156,8 @@ func (d *jsonBinaryDecoder) decodeObjectOrArray(data []byte, isSmall bool, isObj
 		// bug ref: https://bugs.mysql.com/bug.php?id=88791
 		// As generated column value is not used in replication, we can just ignore
 		// this error and return a dummy value for this column.
-		if d.ignoreDecodeErr {
+		//if d.ignoreDecodeErr {
+		if true {
 			d.err = nil
 		}
 		return nil
